@@ -1,39 +1,17 @@
-
 name: Build APK
-
-on:
-  push:
-  workflow_dispatch:
-
+on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - run: bash setup.sh
+      - uses: gradle/actions/setup-gradle@v3
+        with: { gradle-version: "8.5" }
+      - run: gradle assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
         with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Prepare Android project
-        run: bash setup.sh
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.2'
-
-      - name: Build debug APK
-        run: gradle assembleDebug --no-daemon
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: ELAINA-Optimasi-APK
+          name: crosshair-apk
           path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          
